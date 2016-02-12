@@ -12,6 +12,9 @@
 (defun vector-length (v)
   (sqrt (reduce #'+ (mapcar (lambda (i) (* i i)) v))))
 
+(defun vector-+ (a b)
+  (mapcar #'+ a b))
+
 (defun vector-* (v l)
   (cond ((and (listp v)
 	      (atom l))

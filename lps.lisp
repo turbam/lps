@@ -7,10 +7,12 @@
 (defparameter *mass* 1)
 
 ;;car is coordinate, cdr is velocity
-(defparameter *particle-list* '(((1) . 0) ((0) . 0) ((-0.5) . 0)))
+(defparameter *particle-list* '(((2)  (0))
+				((0.3)  (0))
+				((-2) (0))))
 
 (defparameter *sigma* 1.2)
-(defparameter *epsilon* 0.1)
+(defparameter *epsilon* 20)
 
 (defun lennard-jones-pot (epsilon sigma r)
   (cond ((zerop r) 0)
@@ -33,3 +35,17 @@
 			 (unit-vector (vector-from-coordinates (car i) (car particle))))
      for velocity-scalar = (velocity (abs lj-potential) *mass*)
      collect (vector-* velocity-scalar direction)))
+
+(defun misc (particles)
+  (loop while t do
+       (let* ((old-velocities (mapcar #'cadr particles))
+	      (new-vel-vectors (mapcar (lambda (i) (vector-/ i 1000000))
+				       (loop for i in particles
+					  collect (reduce #'vector-+ (get-velocity i (remove i particles))))))
+	      (new-velocities (mapcar #'vector-+ old-velocities new-vel-vectors))
+	      (old-positions (mapcar #'car particles))
+	      (new-positions (mapcar #'vector-+ old-positions new-velocities))
+	      (new-particle-list (mapcar (lambda (a b) (list a b)) new-positions new-velocities)))
+	 (format t "~d~%~d~%~%~d~%~d~%~%~%" old-positions old-velocities new-positions new-velocities)
+	 (setq particles (copy-list new-particle-list))
+	 (sleep 0.01))))
