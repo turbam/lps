@@ -7,12 +7,24 @@
 (defparameter *mass* 1)
 
 ;;car is coordinate, cdr is velocity
-(defparameter *particle-list* '(((2)  (0))
-				((0.3)  (0))
-				((-2) (0))))
+(defparameter *particle-list* '(((20 10)  (0 0))
+				((0.3 0)  (0 0))
+				((-20 40) (0 0))
+				((74 -20) (0 0))
+				((34 -10) (0 0))))
 
-(defparameter *sigma* 1.2)
+(defparameter *sigma* 28)
 (defparameter *epsilon* 20)
+
+(defun gen-random-particles (n)
+  (loop for i from 1 to n
+     collect (list (list (if (> 50 (random 100))
+			     (* -1 (random 100))
+			     (random 100))
+			 (if (> 50 (random 100))
+			     (* -1 (random 100))
+			     (random 100)))
+		   '(0 0))))
 
 (defun lennard-jones-pot (epsilon sigma r)
   (cond ((zerop r) 0)
@@ -37,15 +49,13 @@
      collect (vector-* velocity-scalar direction)))
 
 (defun misc (particles)
-  (loop while t do
-       (let* ((old-velocities (mapcar #'cadr particles))
-	      (new-vel-vectors (mapcar (lambda (i) (vector-/ i 1000000))
-				       (loop for i in particles
-					  collect (reduce #'vector-+ (get-velocity i (remove i particles))))))
-	      (new-velocities (mapcar #'vector-+ old-velocities new-vel-vectors))
-	      (old-positions (mapcar #'car particles))
-	      (new-positions (mapcar #'vector-+ old-positions new-velocities))
-	      (new-particle-list (mapcar (lambda (a b) (list a b)) new-positions new-velocities)))
-	 (format t "~d~%~d~%~%~d~%~d~%~%~%" old-positions old-velocities new-positions new-velocities)
-	 (setq particles (copy-list new-particle-list))
-	 (sleep 0.01))))
+  (let* ((old-velocities (mapcar #'cadr particles))
+	 (new-vel-vectors (mapcar (lambda (i) (vector-/ i 1000))
+				  (loop for i in particles
+				     collect (reduce #'vector-+ (get-velocity i (remove i particles))))))
+	 (new-velocities (mapcar #'vector-+ old-velocities new-vel-vectors))
+	 (old-positions (mapcar #'car particles))
+	 (new-positions (mapcar #'vector-+ old-positions new-velocities))
+	 (new-particle-list (mapcar (lambda (a b) (list a b)) new-positions new-velocities)))
+    ;(format t "~d~%~d~%~%~d~%~d~%~%~%" old-positions old-velocities new-positions new-velocities)
+    new-particle-list))
