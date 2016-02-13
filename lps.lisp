@@ -13,6 +13,9 @@
 				((74 -20) (0 0))
 				((34 -10) (0 0))))
 
+;;How much energy is lost due to heat generation?
+(defparameter *collision-factor* (/ 1 1))
+
 (defparameter *sigma* 28)
 (defparameter *epsilon* 20)
 
@@ -45,7 +48,10 @@
      for direction = (if (< lj-potential 0)
 			 (unit-vector (vector-from-coordinates (car particle) (car i)))
 			 (unit-vector (vector-from-coordinates (car i) (car particle))))
-     for velocity-scalar = (velocity (abs lj-potential) *mass*)
+     for velocity-scalar = (velocity (if (< lj-potential 0)
+					 (abs lj-potential)
+					 (* *collision-factor* (abs lj-potential)))
+				     *mass*)
      collect (vector-* velocity-scalar direction)))
 
 (defun misc (particles)
